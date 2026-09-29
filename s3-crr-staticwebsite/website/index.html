@@ -3,9 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>AWS S3 Multi-Region Live Replication Demo</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-bg: rgba(56, 189, 248, 0.1);
+            --secondary: #4ade80;
+            --secondary-bg: rgba(74, 222, 128, 0.1);
+            --border: #334155;
+            --code-bg: #0f172a;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .metacard{
+           display:flex;
+           flex-direction: column;
+           align-items: center;
+           justify-content: space-around;
+
+        }
+       
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .badge-east {
+            background-color: var(--primary-bg);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .badge-west {
+            background-color: var(--secondary-bg);
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        h1 { margin: 0 0 0.5rem 0; font-size: 1.75rem; color: #fff; }
+        h3 { margin: 0 0 0.5rem 0; color: #fff; }
+        p { color: var(--text-muted); line-height: 1.6; margin: 0 0 1rem 0; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-box {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 1rem;
+            width: 40rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            height: 5rem;
+            flex-direction: column;
+            align-items: center;
+            height: 6rem;
+        }
+
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 0.95rem; font-weight: 600; color: #fff; margin-top: 0.25rem; word-break: break-all; }
+
+        .interactive-area {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        input[type="text"] {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.6rem;
+            border-radius: 6px;
+            flex-grow: 1;
+        }
+
+        ul { list-style: none; padding: 0; margin: 1rem 0 0 0; }
+        li {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: var(--primary);
+        }
+    </style>
 </head>
 <body>
-    
+
+<div class="container">
+
+    <!-- Header Card -->
+    <div class="card">
+        <div id="region-badge" class="badge">Checking Region...</div>
+        <h1>Multi-Region Static Website Demo</h1>
+        <p>This static site is deployed using <strong>pure AWS CLI Bash automation</strong> and synced asynchronously across regions via <strong>S3 Cross-Region Replication (CRR)</strong>.</p>
+    </div>
+
+    <!-- Live Endpoint & Client Metadata -->
+    <div class="card">
+        <h3>📍 Live Deployment Metadata</h3>
+        <div class="metacard">
+            <div class="stat-box">
+                <div class="stat-label">Host Domain</div>
+                <div id="host-name" class="stat-value">Detecting...</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Active AWS Region</div>
+                <div id="aws-region" class="stat-value">Detecting...</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Loaded At</div>
+                <div id="load-time" class="stat-value">--</div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <!-- CLI Proof Guide for GitHub Visitors -->
+    <div class="card">
+        <h3>🔍 Proof of Replication for GitHub Reviewers</h3>
+        <p>You can run this AWS CLI command in your terminal to verify that AWS flagged this object as <code>COMPLETED</code> for Cross-Region Replication:</p>
+        <p><code>aws s3api head-object --bucket YOUR-DEST-BUCKET --key index.html --region us-west-2</code></p>
+    </div>
+
+</div>
+
+<script>
+    // 1. Detect Host & Region Metadata
+    const host = window.location.hostname;
+    document.getElementById('host-name').innerText = host || 'Local / localhost';
+    document.getElementById('load-time').innerText = new Date().toLocaleTimeString();
+
+    const badge = document.getElementById('region-badge');
+    const regionVal = document.getElementById('aws-region');
+
+   if (host.includes('us-east-1')) {
+    badge.innerText = 'PRIMARY REGION: US-EAST-1';
+    badge.className = 'badge badge-east';
+    regionVal.innerText = 'us-east-1 (N. Virginia)';
+} else if (host.includes('us-east-2')) { 
+    badge.innerText = 'REPLICATED REGION: US-EAST-2';
+    badge.className = 'badge badge-west';
+    regionVal.innerText = 'us-east-2 (Ohio)';
+} else {
+    badge.innerText = 'LOCAL ENVIRONMENT';
+    badge.className = 'badge';
+    regionVal.innerText = 'Local / Test Host';
+}
+
+
+</script>
+
 </body>
 </html>

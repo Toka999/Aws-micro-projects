@@ -107,9 +107,9 @@ Run the complete automated setup script:
 Once `setup.sh` finishes execution, the public static website endpoints will be formatted as follows:
 
 * **Primary Endpoint (`us-east-1`):**
-`[http://crr-site-source--9988.s3-website-us-east-1.amazonaws.com](https://crr-site-source-977476317748-9988.s3.us-east-1.amazonaws.com/index.html)`
+(http://crr-site-source--9988.s3-website-us-east-1.amazonaws.com) [https://crr-site-source-977476317748-9988.s3.us-east-1.amazonaws.com/index.html]`
 * **Replica Endpoint (`us-east-2`):**
-`[http://crr-site-dest--9988.s3-website-us-east-2.amazonaws.com](https://crr-site-dest-977476317748-9988.s3.us-east-2.amazonaws.com/index.html)`
+(http://crr-site-dest--9988.s3-website-us-east-2.amazonaws.com) [https://crr-site-dest-977476317748-9988.s3.us-east-2.amazonaws.com/index.html]`
 
 
 

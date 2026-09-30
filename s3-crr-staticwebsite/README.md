@@ -182,3 +182,21 @@ Versioned buckets must be fully emptied (including all versions and delete marke
 | Replica bucket stays empty | Versioning not enabled on both buckets, or the IAM role lacks permissions. Note CRR only replicates objects uploaded **after** the rule exists. |
 | `BucketAlreadyExists` | Bucket names are global; change the suffix (`9988`) in the script. |
 | Script fails on Windows | Run from Git Bash, not CMD or PowerShell. |
+
+---
+
+## Live Deployment Proof
+
+Both regions are live and serving the same site. Open each link to verify.
+
+| Region | Role | Website Endpoint |
+|---|---|---|
+| `us-east-1` (N. Virginia) | Primary (source) | [http://crr-site-source-977476317748-9988.s3-website-us-east-1.amazonaws.com](http://crr-site-source-977476317748-9988.s3-website-us-east-1.amazonaws.com) |
+| `us-east-2` (Ohio) | Replica (destination) | [http://crr-site-dest-977476317748-9988.s3-website-us-east-2.amazonaws.com](http://crr-site-dest-977476317748-9988.s3-website-us-east-2.amazonaws.com) |
+
+Direct object URLs:
+
+- Primary: [https://crr-site-source-977476317748-9988.s3.us-east-1.amazonaws.com/index.html](https://crr-site-source-977476317748-9988.s3.us-east-1.amazonaws.com/index.html)
+- Replica: [https://crr-site-dest-977476317748-9988.s3.us-east-2.amazonaws.com/index.html](https://crr-site-dest-977476317748-9988.s3.us-east-2.amazonaws.com/index.html)
+
+**How to confirm CRR is working:** each page shows its serving region (detected from the hostname). The replica page is never uploaded to directly, so if it loads the same content, it arrived through Cross-Region Replication.
